@@ -144,21 +144,9 @@ public class Mod : ModBase // <= Do not Remove.
         _modLoader.GetController<IScannerFactory>().TryGetTarget( out var sf );
         _memoryScanner = sf.CreateScanner( Process.GetCurrentProcess(), Process.GetCurrentProcess().MainModule );
 
-        /*_logger.WriteLine( _gamePath + "GP", Color.Blue );
-        extract.ExtractComplete += ( string? path ) => {
-            _logger.WriteLine( path, Color.Blue );
-            tournamentData = new TournamentData( this, _logger, _configuration );
-            SetupMonsterBreeds();
-            SetupTournamentParticipantsFromTaikai();
-
-
-            _LT = new LearningTesting( hooks, _address_currentweek );
-            _LT._tournamentStatBonus = _configuration._confDTP_tournament_stat_growth > 0 ? _configuration._confDTP_tournament_stat_growth + 1 : 0;
-       };
-        */
         HandleExtraction(extract);
 
-        //Debugger.Launch();
+        Debugger.Launch();
 
     }
 
@@ -186,7 +174,7 @@ public class Mod : ModBase // <= Do not Remove.
         SetupMonsterBreeds();
         SetupTournamentParticipantsFromTaikai();
 
-        _LT = new LearningTesting( _iHooks, _address_currentweek );
+        _LT = new LearningTesting( _iHooks, gameAddress );
         _LT._tournamentStatBonus = _configuration._confDTP_tournament_stat_growth > 0 ? _configuration._confDTP_tournament_stat_growth + 1 : 0;
     }
 
@@ -233,7 +221,9 @@ public class Mod : ModBase // <= Do not Remove.
 
         Memory.Instance.Read<uint>( _address_currentweek, out uint currentWeek );
         if ( _game_currentWeek != currentWeek ) { 
-            _game_currentWeek = currentWeek; currentWeek = 1; }
+            _game_currentWeek = currentWeek; 
+            currentWeek = 1; 
+        }
 
         // Unfortunately the ordering of these function calls matters so we have to do this shuffling depending on if the game week progressed.
         if ( currentWeek == 1 ) { GetUnlockedMonsters( _address_unlockedmonsters ); }

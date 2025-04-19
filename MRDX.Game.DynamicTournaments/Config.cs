@@ -38,6 +38,15 @@ public class Config : Configurable<Config>
     public E_ConfABD_TournamentBreeds _confABD_tournamentBreeds { get; set; } = E_ConfABD_TournamentBreeds.PlayerOnlyRealistic;
     public enum E_ConfABD_TournamentBreeds { PlayerOnly, Realistic, PlayerOnlyRealistic, WildWest }
 
+    [Category( "Tournament Opponents" )]
+    [DisplayName( "Unique Species" )]
+    [Description( "A multiplier for how often unique species are added to tournaments once available.\n" +
+     "Valid values are from 0.01 - 1.0, 1% as common to 100% as common.\n" +
+     "Note: Unique species make up a significant portion of the monsters in MR2." )]
+    [DefaultValue( 0.25 )]
+    [SliderControlParams( minimum: 0.01, maximum: 1.0, showTextField: true, isTextFieldEditable: true )]
+    public double _confDTP_species_unique { get; set; } = 0.25;
+
 
     [Category( "Tournament Ranks" )]
     [DisplayName( "Stat Cap - Major 4" )]
@@ -98,7 +107,7 @@ public class Config : Configurable<Config>
     [Category( "Gameplay Adjustments" )]
     [DisplayName( "Tournament Stat Growths" )]
     [Description( "The modifier adds up to the provided value for each stat when participating in a tournament.\n" +
-    "A value of 5 would add between 0-5 points to each stat upon completion of a tournament.\n" +
+    "A value of 4 adds between 0-4 points to each stat upon completion of a tournament.\n" +
     "Game Default: 0, Recommended: 4" )]
     [DefaultValue( 4 )]
     public int _confDTP_tournament_stat_growth { get; set; } = 4;
@@ -141,6 +150,15 @@ public class Config : Configurable<Config>
     public int _confABD_growth_monthlyvariance { get; set; } = 12;
 
     [Category( "Advanced - Monster Growths" )]
+    [DisplayName( "Wildcard Stats" )]
+    [Description( "The odds of a stat being 'wildcard'.\n" +
+    "Lower values will result in significantly less 'cohesive' monsters.\n" +
+    "Higher variance will result in the appearance of more stragglers (monsters stuck or lagging for their class." )]
+    [SliderControlParams( minimum: 1, maximum: 500, showTextField: true, isTextFieldEditable: true )]
+    [DefaultValue( 300 )]
+    public int _confABD_growth_wildcardstat { get; set; } = 300;
+
+    [Category( "Advanced - Monster Growths" )]
     [DisplayName( "Technique Growth Intelligence" )]
     [Description( "Determines the behavior of how techniques are learned by tournament monsters.\n" +
      "Minimal - Uses extremely simple decision making for choosing techs. Almost the wild west for making choices.\n" +
@@ -150,6 +168,18 @@ public class Config : Configurable<Config>
     [DefaultValue( E_ConfABD_TechInt.Smart )]
     public E_ConfABD_TechInt _confABD_techIntelligence { get; set; } = E_ConfABD_TechInt.Smart;
     public enum E_ConfABD_TechInt { Minimal, Average, Smart, Genius }
+
+    [Category( "Advanced - Monster Lifespan" )]
+    [DisplayName( "Monster Lifespan Minimum" )]
+    [Description( "The minimum months a tournament monster will live.")]
+    [DefaultValue( 36 )]
+    public int _confABD_tm_lifespan_min { get; set; } = 36;
+
+    [Category( "Advanced - Monster Lifespan" )]
+    [DisplayName( "Monster Lifespan Maximum" )]
+    [Description( "The maximum months a tournament monster will live." )]
+    [DefaultValue( 84 )]
+    public int _confABD_tm_lifespan_max { get; set; } = 84;
 
     [Category("Advanced - Mod Debugging")]
     [DisplayName("Reloaded Message Verbosity")]

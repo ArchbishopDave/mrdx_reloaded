@@ -70,17 +70,18 @@ namespace MRDX.Game.DynamicTournaments
                 stattotal += Math.Max(abdm.monster.stat_total - (stat_end - 100), 1);
             }
 
-            if ( stattotal < 20 ) { TournamentData._mod.DebugLog( 1, "Tournament Stat Totals dangeorusly low. Growth rates may be too low.", Color.Yellow ); }
+            if ( stattotal > 50 ) {
+                stattotal = Random.Shared.Next() % stattotal;
+                for ( var i = 0; i < monsters.Count; i++ ) {
+                    int mvalue = Math.Max( monsters[ i ].monster.stat_total - ( stat_end - 100 ), 1 ); ;
+                    stattotal -= mvalue;
+                    promoted = monsters[ i ];
+                    if ( stattotal <= 0 ) { break; }
+                }
 
-            stattotal = Random.Shared.Next() % stattotal;
-            for ( var i = 0; i < monsters.Count; i++ ) {
-                int mvalue = Math.Max( monsters[ i ].monster.stat_total - ( stat_end - 100 ), 1 ); ;
-                stattotal -= mvalue;
-                promoted = monsters[ i ];
-                if ( stattotal <= 0 ) { break; }
+                MonsterPromoteToNewPool( promoted, newPool );
             }
-
-            MonsterPromoteToNewPool( promoted, newPool );
+            else { TournamentData._mod.DebugLog( 1, "Tournament Stat Totals dangeorusly low. Growth rates may be too low.", Color.Yellow ); } 
 
             for ( var i = monsters.Count() - 1; i >= 0; i-- ) { 
                 if ( monsters[i].monster.stat_total - 100 > stat_end ) {
@@ -108,7 +109,7 @@ namespace MRDX.Game.DynamicTournaments
             if ( _tournamentPool == ETournamentPools.A_Phoenix ) {
                 for ( var i = 0; i < 500; i++ ) {
                     breed = MonsterBreed.AllBreeds[ Random.Shared.Next() % MonsterBreed.AllBreeds.Count ];
-                    if ( breed.breed_id == MonsterGenus.Phoenix ) {
+                    if ( breed.breed_id == MonsterGenus.Phoenix || breed.sub_id == MonsterGenus.Phoenix ) {
                         break;
                     }
                 }
@@ -174,7 +175,12 @@ namespace MRDX.Game.DynamicTournaments
                 for ( var i = 0; i < 100; i++ ) {
                     breed = MonsterBreed.AllBreeds[ Random.Shared.Next() % MonsterBreed.AllBreeds.Count ];
                     if ( available.Contains( breed.breed_id ) && available.Contains( breed.sub_id ) ) {
-                        break;
+                        if ( breed.sub_id == MonsterGenus.Unknown1 || breed.sub_id == MonsterGenus.Unknown2 || breed.sub_id == MonsterGenus.Unknown3 ||
+                            breed.sub_id == MonsterGenus.Unknown4 || breed.sub_id == MonsterGenus.Unknown5 || breed.sub_id == MonsterGenus.Unknown6 ) {
+                            if ( Random.Shared.NextDouble() < TournamentData._configuration._confDTP_species_unique ) { break; }
+                        }
+
+                        else { break; }
                     }
                 }
             }
@@ -212,21 +218,26 @@ namespace MRDX.Game.DynamicTournaments
             abdm.monster.battle_specials = (byte) (Random.Shared.Next() % 4);
 
             // Attempt to assign three basics, weighted generally towards worse basic techs with variance.
+            if ( abdm.breedInfo._techniques[ 0 ]._errantry == ErrantryType.Basic ) { 
+                abdm.monster.techniques = abdm.monster.techniques | (uint) ( 1 << abdm.breedInfo._techniques[ 0 ]._id );
+                abdm.techniques.Add( abdm.breedInfo._techniques[ 0 ] );
+            }
+
             for ( var tc = 0; tc < 3; tc++ ) {
                 MonsterTechnique tech = abdm.breedInfo._techniques[ 0 ];
 
-                for ( var j = 0; j < abdm.breedInfo._techniques.Count; j++ ) {
+                for ( var j = 1; j < abdm.breedInfo._techniques.Count; j++ ) {
                     var nt = abdm.breedInfo._techniques[ j ];
                     if ( nt._errantry == ErrantryType.Basic ) {
-                        if ( nt._techValue + Random.Shared.Next() % 15 < tech._techValue ) {
+                        if ( nt._techValue - ( Random.Shared.Next() % 20 ) < tech._techValue ) {
                             tech = nt;
                         }
                     }
-
-                    abdm.monster.techniques = abdm.monster.techniques | (uint) ( 1 << tech._id );
                 }
+
+                abdm.MonsterAddTechnique( tech );
             }
-            TournamentData._mod.DebugLog( 3, "TP: Basics Setup", Color.AliceBlue );
+            TournamentData._mod.DebugLog( 3, "TP: Basics Setup " + abdm.techniques.Count, Color.AliceBlue );
 
             // This is significantly messing with growth rates across the board. Going to manually set the lifespan afterwards based upon the rank.
             while ( abdm.monster.stat_total < stat_start ) {
@@ -252,7 +263,7 @@ namespace MRDX.Game.DynamicTournaments
 
             abdm.PromoteToRank( _monsterRank );
             
-                TournamentData._mod.DebugLog( 2, "TP: Complete", Color.AliceBlue );
+            TournamentData._mod.DebugLog( 2, "TP: Complete", Color.AliceBlue );
             tournamentData.monsters.Add( abdm );
             this.MonsterAdd( abdm );
         }
